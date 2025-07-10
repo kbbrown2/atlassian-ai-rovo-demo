@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Report: Atlassian AI & Rovo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Slate, White) with a Calm Blue accent -->
+    <!-- Application Structure Plan: A tabbed dashboard interface (Overview, Rovo AI, Core Capabilities, Product Explorer, Pricing & Plans, Rovo Demo, Atlassian AI Demo, Summary) was designed to offer a non-linear, user-driven exploration. This structure allows the user to jump directly to areas of interest (e.g., specific product integrations or pricing) without following a rigid sequence, enhancing usability for a demo. The 'Product Explorer' tab is a key interactive component, dynamically updating content based on user selection, making the demonstration of AI features in different Atlassian apps highly efficient and engaging. A dedicated 'Rovo AI' tab was added to provide a focused deep-dive into its specific components and benefits. New 'Rovo Demo' and 'Atlassian AI Demo' tabs were added to directly embed video content, providing a dynamic visual overview. -->
+    <!-- Visualization & Content Choices: - Overview: Presents the foundational concepts of Rovo AI and Atlassian Intelligence using descriptive text blocks, emphasizing their distinct roles and synergy. - Rovo AI: Provides detailed information on Rovo's specific features like AI Agents, Rovo Studio, and Rovo Chat, using text and bullet points. - Core Capabilities: Displays high-level AI features as scannable, interactive cards (HTML/CSS) to quickly convey the breadth of AI functionality. - Product Explorer: Utilizes dynamic text content, updated via JavaScript based on button clicks, to detail AI integration within specific Atlassian products (Jira, JSM, Confluence, Trello, Bitbucket). This allows focused, on-demand information delivery. - Pricing & Plans: Visualizes illustrative premium plan costs using a Chart.js bar chart (Canvas). This quantitative data is presented clearly for comparison, with tooltips for detail. - Rovo Demo & Atlassian AI Demo: Embeds YouTube videos using responsive iframes to provide direct visual demonstrations. - Summary: Provides concise bullet points summarizing key takeaways. All visual elements adhere to the NO SVG/Mermaid constraint. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            color: #2563eb; /* blue-600 */
+            border-color: #2563eb; /* blue-600 */
+            font-weight: 600;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .product-button.active {
+            background-color: #2563eb;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .feature-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* shadow-md */
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">Atlassian AI & Rovo</h1>
+            <p class="mt-3 text-lg text-slate-600">An Interactive Guide to Transforming Teamwork</p>
+        </header>
+
+        <nav class="mb-8 border-b border-slate-200">
+            <div class="flex flex-wrap -mb-px justify-center text-sm font-medium text-center text-slate-500">
+                <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-700 hover:border-slate-300" data-tab="overview">Overview</button>
+                <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-700 hover:border-slate-300" data-tab="rovo-ai">Rovo AI</button>
+                <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-700 hover:border-slate-300" data-tab="core-capabilities">Core Capabilities</button>
+                <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-700 hover:border-slate-300" data-tab="explorer">Product Explorer</button>
+                <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-700 hover:border-slate-300" data-tab="pricing">Pricing & Plans</button>
+                <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-700 hover:border-slate-300" data-tab="rovo-demo">Rovo Demo</button>
+                <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-700 hover:border-slate-300" data-tab="atlassian-ai-demo">Atlassian AI Demo</button>
+                <button class="tab-button inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-slate-700 hover:border-slate-300" data-tab="summary">Summary</button>
+            </div>
+        </nav>
+
+        <main>
+            <section id="overview" class="content-section">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-8 text-slate-900">What is the Atlassian AI Ecosystem?</h2>
+                    <p class="text-center text-slate-600 mb-12">This section introduces the foundational concepts of Atlassian's AI strategy. It clarifies the relationship between **Atlassian Intelligence**, the underlying AI engine, and **Rovo AI**, the user-facing suite of tools. Understanding this distinction is crucial for grasping how AI capabilities are integrated and delivered across Atlassian products to enhance team performance.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="text-2xl font-bold mb-3 text-blue-600">Rovo AI</h3>
+                            <p class="font-semibold text-slate-700 mb-4">The Advanced AI Teammate</p>
+                            <p class="text-slate-600 mb-4">Think of Rovo as the interactive application layer of Atlassian's AI. It's a powerful suite of tools designed to unify your tools, knowledge, and teams into a single, intelligent experience. It's what you directly interact with to get work done faster.</p>
+                            <ul class="space-y-2 text-slate-600">
+                                <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">&#10148;</span><div><strong>Purpose:</strong> Enhance team performance, automate tasks, and provide instant access to information.</div></li>
+                                <li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">&#10148;</span><div><strong>Key Components:</strong> AI Agents, Rovo Chat, Rovo Studio, and powerful cross-app search.</div></li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="text-2xl font-bold mb-3 text-slate-800">Atlassian Intelligence</h3>
+                            <p class="font-semibold text-slate-700 mb-4">The Foundational AI Engine</p>
+                            <p class="text-slate-600 mb-4">This is the core platform that powers Rovo and all other AI features across Atlassian products. It works behind the scenes, leveraging proprietary models, OpenAI technology, and the unique "Teamwork Graph" to understand your organization's specific context.</p>
+                            <ul class="space-y-2 text-slate-600">
+                                <li class="flex items-start"><span class="text-slate-500 mr-2 mt-1">&#10148;</span><div><strong>Technology:</strong> A combination of proprietary models, OpenAI, and your unique Teamwork Graph.</div></li>
+                                <li class="flex items-start"><span class="text-slate-500 mr-2 mt-1">&#10148;</span><div><strong>Focus:</strong> Boost productivity, leverage organizational data, and enable data-driven decisions.</div></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="rovo-ai" class="content-section">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-8 text-slate-900">Deep Dive: Rovo AI</h2>
+                    <p class="text-center text-slate-600 mb-12">This section provides a dedicated exploration of Rovo AI, Atlassian's advanced AI platform designed to be your intelligent teammate. It details Rovo's key components and how they work together to unify tools, knowledge, and teams, driving efficiency and informed decision-making across your organization.</p>
+                    <div class="grid md:grid-cols-1 gap-8">
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="text-2xl font-bold mb-3 text-blue-600">Rovo's Core Components</h3>
+                            <ul class="space-y-4 text-slate-600">
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-3 mt-1 text-xl">&#9679;</span>
+                                    <div>
+                                        <strong class="text-slate-700">AI Agents:</strong> These are tailored AI models designed to perform specific tasks. Rovo comes with over 20 ready-to-use agents (e.g., Issue Organizer, Service Triage Assistant) and allows for the creation of custom agents through Rovo Studio to automate complex workflows, gather information, and improve efficiency.
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-3 mt-1 text-xl">&#9679;</span>
+                                    <div>
+                                        <strong class="text-slate-700">Rovo Chat:</strong> An intelligent conversational agent, similar to a GenAI chatbot, integrated into Atlassian products like Confluence. It allows users to ask natural language questions and receive contextual answers, summarize content, and even trigger actions like creating Jira issues directly from the chat interface.
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-3 mt-1 text-xl">&#9679;</span>
+                                    <div>
+                                        <strong class="text-slate-700">Rovo Studio:</strong> A powerful, low-code/no-code builder that empowers teams (even non-technical users) to create custom AI agents and automations. It's a unified experience for building tailored AI logic and integrating it with existing workflows.
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-3 mt-1 text-xl">&#9679;</span>
+                                    <div>
+                                        <strong class="text-slate-700">Advanced Search & Knowledge Cards:</strong> Rovo leverages Atlassian Intelligence to provide AI-powered search capabilities across your entire Atlassian ecosystem and connected third-party apps (e.g., Slack, Google Drive). Knowledge Cards provide instant, contextual definitions and insights within your workflow.
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-3 mt-1 text-xl">&#9679;</span>
+                                    <div>
+                                        <strong class="text-slate-700">Teamwork Graph:</strong> The underlying engine that powers Rovo's personalization. It connects people, work, and knowledge across your organization to deliver highly relevant and accurate AI insights.
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="text-2xl font-bold mb-3 text-slate-800">Why Rovo Matters</h3>
+                            <p class="text-slate-600 mb-4">Rovo AI is designed to address common workplace challenges by:</p>
+                            <ul class="space-y-2 text-slate-600">
+                                <li class="flex items-start"><span class="text-slate-500 mr-2 mt-1">&#10148;</span><div>**Reducing Context Switching:** By unifying tools and knowledge, Rovo minimizes the need to jump between different applications.</div></li>
+                                <li class="flex items-start"><span class="text-slate-500 mr-2 mt-1">&#10148;</span><div>**Automating Repetitive Tasks:** AI Agents take over mundane work, freeing up teams to focus on higher-value activities.</div></li>
+                                <li class="flex items-start"><span class="text-slate-500 mr-2 mt-1">&#10148;</span><div>**Accelerating Decision-Making:** Instant access to relevant information and AI-powered insights enables faster, more informed choices.</div></li>
+                                <li class="flex items-start"><span class="text-slate-500 mr-2 mt-1">&#10148;</span><div>**Improving Collaboration:** By keeping everyone on the same page and providing shared intelligence, Rovo fosters more cohesive teamwork.</div></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="core-capabilities" class="content-section">
+                 <div class="max-w-5xl mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-8 text-slate-900">Core AI Capabilities</h2>
+                    <p class="text-center text-slate-600 mb-12">This section highlights the universal AI capabilities that Atlassian Intelligence brings to its entire product suite. These features are designed to provide a consistent and powerful intelligent experience, regardless of which Atlassian application you are using. Each card represents a key area where AI enhances productivity and workflow.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="font-bold text-lg mb-2 text-slate-900">Natural Language Interaction</h3>
+                            <p class="text-slate-600">Ask questions and search for work using everyday language. The AI translates your intent into complex queries (like JQL) automatically.</p>
+                        </div>
+                        <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="font-bold text-lg mb-2 text-slate-900">Content Generation & Enhancement</h3>
+                            <p class="text-slate-600">Draft, edit, translate, and reformat content on the fly. Improve your writing and adjust the tone with a single click.</p>
+                        </div>
+                        <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="font-bold text-lg mb-2 text-slate-900">Intelligent Summaries</h3>
+                            <p class="text-slate-600">Get concise summaries of long pages, comment threads, and whiteboards to catch up instantly without the reading.</p>
+                         </div>
+                         <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="font-bold text-lg mb-2 text-slate-900">Automated Workflows</h3>
+                            <p class="text-slate-600">Create complex automation rules using simple prompts. The AI can also suggest and create tasks based on context from pages or chats.</p>
+                        </div>
+                        <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="font-bold text-lg mb-2 text-slate-900">Contextual Definitions</h3>
+                            <p class="text-slate-600">Instantly get definitions for company-specific jargon, project codenames, and acronyms directly within your workflow.</p>
+                        </div>
+                         <div class="feature-card bg-white p-6 rounded-xl shadow-md border border-slate-200">
+                            <h3 class="font-bold text-lg mb-2 text-slate-900">Cross-Tool Knowledge</h3>
+                            <p class="text-slate-600">Rovo's search and agents pull information not just from Atlassian tools, but also from connected apps like Slack, Google Drive, and GitHub.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="explorer" class="content-section">
+                <div class="max-w-6xl mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-4 text-slate-900">AI in Your Favorite Tools</h2>
+                    <p class="text-center text-slate-600 mb-10">This interactive section allows you to explore how Atlassian AI and Rovo's capabilities are specifically integrated into each core Atlassian product. By selecting a product, you'll see a dynamic list of features, demonstrating how AI moves from a general concept to a practical, daily productivity booster within familiar applications.</p>
+                    <div class="flex justify-center flex-wrap gap-3 mb-8">
+                        <button class="product-button transition-colors duration-200 py-2 px-5 rounded-full font-semibold bg-white text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-100" data-product="jira">Jira</button>
+                        <button class="product-button transition-colors duration-200 py-2 px-5 rounded-full font-semibold bg-white text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-100" data-product="jsm">JSM</button>
+                        <button class="product-button transition-colors duration-200 py-2 px-5 rounded-full font-semibold bg-white text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-100" data-product="confluence">Confluence</button>
+                        <button class="product-button transition-colors duration-200 py-2 px-5 rounded-full font-semibold bg-white text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-100" data-product="trello">Trello</button>
+                        <button class="product-button transition-colors duration-200 py-2 px-5 rounded-full font-semibold bg-white text-slate-700 shadow-sm border border-slate-200 hover:bg-slate-100" data-product="bitbucket">Bitbucket</button>
+                    </div>
+                    <div id="product-content" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-slate-200 min-h-[300px]">
+                    </div>
+                </div>
+            </section>
+
+            <section id="pricing" class="content-section">
+                 <div class="max-w-5xl mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-4 text-slate-900">Upgrading to AI-Powered Plans</h2>
+                    <p class="text-center text-slate-600 mb-12">This section clarifies the cost model for accessing Atlassian AI and Rovo AI. It's important to note that these advanced capabilities are not separate add-ons but are integrated features included within Atlassian's **Premium** and **Enterprise** Cloud plans. The chart below provides an illustrative comparison of the Premium plan costs for key products, helping to visualize the investment required for these enhanced functionalities.</p>
+                    <div class="chart-container">
+                        <canvas id="pricingChart"></canvas>
+                    </div>
+                     <p class="text-center text-xs text-slate-500 mt-4">Pricing is illustrative, per user/month, billed annually. Enterprise plans require custom quotes.</p>
+                </div>
+            </section>
+
+            <section id="rovo-demo" class="content-section">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-8 text-slate-900">Rovo AI in Action</h2>
+                    <p class="text-center text-slate-600 mb-8">Watch this video to see Rovo AI's capabilities, including its AI Agents, Rovo Chat, and how it unifies information across your Atlassian ecosystem, in a live demonstration.</p>
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/G5EBWZZam-Y" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </section>
+
+            <section id="atlassian-ai-demo" class="content-section">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-8 text-slate-900">Atlassian AI Overview Demo</h2>
+                    <p class="text-center text-slate-600 mb-8">This video provides a broader overview of Atlassian Intelligence, showcasing its core functionalities and how it integrates across various Atlassian products to enhance productivity and collaboration.</p>
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/MUNxon045FA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="summary" class="content-section">
+                <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-slate-200">
+                    <h2 class="text-3xl font-bold mb-6 text-slate-900">Summary & Key Takeaways</h2>
+                    <p class="text-center text-slate-600 mb-8">This final section consolidates the key messages from the report, providing a concise overview of Atlassian's AI offerings. It emphasizes the integrated nature of Rovo AI and Atlassian Intelligence, their core benefits, and the straightforward pricing model, ensuring a clear understanding of the value proposition.</p>
+                    <ul class="space-y-4 text-slate-700">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 font-bold text-xl mr-3 mt-1">&#10004;</span>
+                            <div><strong>Unified Platform:</strong> Rovo AI is Atlassian's comprehensive AI platform, unifying tools and knowledge, powered by the foundational Atlassian Intelligence engine.</div>
+                        </li>
+                        <li class="flex items-start">
+                             <span class="text-blue-500 font-bold text-xl mr-3 mt-1">&#10004;</span>
+                            <div><strong>Deeply Integrated:</strong> AI features are not a separate tool but are woven directly into Jira, JSM, Confluence, Trello, and Bitbucket to enhance existing workflows.</div>
+                        </li>
+                         <li class="flex items-start">
+                            <span class="text-blue-500 font-bold text-xl mr-3 mt-1">&#10004;</span>
+                            <div><strong>Core Benefits:</strong> The primary goals are to accelerate work, automate repetitive tasks, provide instant contextual answers, and improve decision-making.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 font-bold text-xl mr-3 mt-1">&#10004;</span>
+                            <div><strong>Simple Pricing:</strong> Access to all AI capabilities is included with a **Premium** or **Enterprise** Cloud subscription, not as a separate, complex add-on.</div>
+                        </li>
+                    </ul>
+                    <div class="mt-8 pt-6 border-t border-slate-200">
+                        <h3 class="text-2xl font-bold mb-4 text-slate-900">Next Steps</h3>
+                        <p class="text-slate-600">The most effective way to evaluate the impact of these tools is to experience them firsthand. Consider a trial of a Premium plan for one of our key products to explore how these AI features can benefit our team's specific workflows.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-button');
+            const sections = document.querySelectorAll('.content-section');
+            const productButtons = document.querySelectorAll('.product-button');
+            const productContentContainer = document.getElementById('product-content');
+
+            const productData = {
+                jira: {
+                    title: 'AI in Jira Software',
+                    features: [
+                        '**Natural Language Search:** Find issues using plain English instead of writing complex JQL.',
+                        '**AI Automation:** Describe a rule in a sentence, and AI will build the automation for you.',
+                        '**Child Work Item Suggestions:** Automatically generate a list of subtasks based on a parent issue.',
+                        '**Work Item Creation from Chats:** Turn Slack or Teams messages into Jira issues with AI-generated summaries.',
+                        '**JQL Error Fixer:** The AI finds and corrects typos and syntax errors in your JQL queries.'
+                    ]
+                },
+                jsm: {
+                    title: 'AI in Jira Service Management',
+                    features: [
+                        '**AI Triage:** Intelligently categorizes incoming requests and assigns them to the correct type.',
+                        '**Customer Sentiment Analysis:** Gauges the emotion in customer comments to help prioritize tickets.',
+                        '**Draft Replies:** Generates context-aware responses to customers based on past similar tickets.',
+                        '**Virtual Service Agent:** An AI-powered chatbot that can resolve common requests automatically.',
+                        '**AI Suggestions Panel:** Recommends assignees, troubleshooting steps, and related knowledge base articles.'
+                    ]
+                },
+                confluence: {
+                    title: 'AI in Confluence',
+                    features: [
+                        '**Content Summarization:** Get a summary of any page, blog post, or comment thread instantly.',
+                        '**Content Creation & Editing:** Draft entire pages, change tone, fix grammar, and translate text.',
+                        '**Jira Task Creation:** Highlight text on a page and turn it into a Jira task, or let AI scan a page for action items.',
+                        '**Q&A Search:** Ask Confluence questions and get direct answers sourced from your knowledge base.',
+                        '**AI Definitions:** Instantly define company-specific jargon and acronyms found on a page.'
+                    ]
+                },
+                trello: {
+                    title: 'AI in Trello',
+                    features: [
+                        '**Card Content Assistance:** Draft, summarize, and refine card descriptions and comments.',
+                        '**Spelling & Grammar Fixes:** Automatically corrects content on cards to improve clarity.',
+                        '**Streamlined Communication:** Helps ensure all information on a Trello card is clear, concise, and professional.',
+                        '**Focus on Efficiency:** While simpler than other integrations, the goal is to speed up the process of creating and managing cards.'
+                    ]
+                },
+                bitbucket: {
+                    title: 'AI in Bitbucket',
+                    features: [
+                        '**Pull Request Descriptions:** Automatically generate clear, detailed descriptions for your pull requests.',
+                        '**Content Assistance:** Draft and refine comments during code reviews, or adjust the tone of your feedback.',
+                        '**Summarization:** Get quick summaries of descriptions and comments in complex pull requests.',
+                        '**Improved Code Reviews:** Speeds up the review process by providing context and clarifying comments.'
+                    ]
+                }
+            };
+            
+            function switchTab(tabId) {
+                sections.forEach(section => {
+                    section.classList.toggle('active', section.id === tabId);
+                });
+                tabs.forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabId);
+                });
+            }
+            
+            function renderProductContent(productId) {
+                const data = productData[productId];
+                if (!data) return;
+
+                let content = `<h3 class="text-2xl font-bold mb-4 text-slate-900">${data.title}</h3><ul class="space-y-3 text-slate-600">`;
+                data.features.forEach(feature => {
+                    const formattedFeature = feature.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-700">$1</strong>');
+                    content += `<li class="flex items-start"><span class="text-blue-500 mr-3 mt-1">&#9679;</span><span>${formattedFeature}</span></li>`;
+                });
+                content += '</ul>';
+                productContentContainer.innerHTML = content;
+                
+                productButtons.forEach(button => {
+                    button.classList.toggle('active', button.dataset.product === productId);
+                });
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+            });
+
+            productButtons.forEach(button => {
+                button.addEventListener('click', () => renderProductContent(button.dataset.product));
+            });
+
+            function initPricingChart() {
+                const ctx = document.getElementById('pricingChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jira Software', 'Confluence', 'Bitbucket', 'Jira Service Mgmt'],
+                        datasets: [{
+                            label: 'Premium Plan Cost ($ / user / month)',
+                            data: [13.53, 9.73, 15, 47.82],
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.7)',
+                                'rgba(37, 99, 235, 0.7)',
+                                'rgba(29, 78, 216, 0.7)',
+                                'rgba(30, 64, 175, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(37, 99, 235, 1)',
+                                'rgba(29, 78, 216, 1)',
+                                'rgba(30, 64, 175, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Illustrative Monthly Premium Plan Costs',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.x !== null) {
+                                            label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.x);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#e2e8f0'
+                                },
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return '$' + value;
+                                    }
+                                }
+                            },
+                             y: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            switchTab('overview');
+            renderProductContent('jira');
+            initPricingChart();
+        });
+    </script>
+</body>
+</html>
